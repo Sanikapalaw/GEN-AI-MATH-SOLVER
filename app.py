@@ -5,9 +5,9 @@ from scipy import fft, stats
 
 # --- 1. CONFIGURATION ---
 st.set_page_config(page_title="Math Logic Solver", layout="wide")
-st.title("🧮 9-Domain Step-by-Step Solver")
+st.title("🧮 9-Domain Mathematical Logic System")
 
-# Global Symbols for Symbolic Math
+# Define Symbols for Symbolic Calculus & Transforms
 x, t, s = sp.symbols('x t s')
 
 # --- 2. THE 9-NUMBERED MENU ---
@@ -40,7 +40,7 @@ elif choice.startswith("2)"):
     rad = np.radians(angle)
     st.write(f"$\sin({angle}^\circ) = {np.sin(rad)}$")
     st.write(f"$\cos({angle}^\circ) = {np.cos(rad)}$")
-    
+    # 
 
 [Image of the unit circle showing sine and cosine values]
 
@@ -52,7 +52,7 @@ elif choice.startswith("3)"):
     data = np.fromstring(data_str, sep=',')
     if len(data) > 0:
         st.write(f"Mean: {np.mean(data)} | Std Dev: {np.std(data)}")
-    
+    # 
 
 [Image of a normal distribution curve with mean and standard deviation]
 
@@ -63,7 +63,7 @@ elif choice.startswith("4)"):
     sig = np.fromstring(st.text_input("Signal Array", "1, 0, 1, 0"), sep=',')
     if len(sig) > 0:
         st.write("FFT Result:", fft.fft(sig))
-    
+    # 
 
 # 5) Laplace
 elif choice.startswith("5)"):
@@ -71,7 +71,7 @@ elif choice.startswith("5)"):
     f_t = st.text_input("Function f(t)", "exp(-t)")
     expr = sp.sympify(f_t)
     st.latex(rf"\mathcal{{L}}\{{{sp.latex(expr)}\}} = {sp.latex(sp.laplace_transform(expr, t, s)[0])}")
-    
+    # 
 
 # 6) DCT
 elif choice.startswith("6)"):
@@ -83,19 +83,22 @@ elif choice.startswith("6)"):
 # 7) Matrices, Vectors, Arrays
 elif choice.startswith("7)"):
     st.header("7) Matrices, Vectors and Arrays")
-    mat = np.array([[347, 769], [847, 567]]) # Using your matrix values
+    # Uses your matrix values from previous images
+    mat = np.array([[347, 769], [847, 567]]) 
     st.write("Matrix A:", mat)
-    st.write("Determinant:", np.linalg.det(mat))
-    
+    st.write(f"Determinant: {np.linalg.det(mat)}")
+    # 
 
 # 8) Derivatives and Integration
 elif choice.startswith("8)"):
     st.header("8) Derivatives and Integration")
     f_x = st.text_input("Function f(x)", "sin(x)**2")
     expr = sp.sympify(f_x)
-    st.write("Derivative:", sp.diff(expr, x))
-    st.write("Indefinite Integral:", sp.integrate(expr, x))
-    
+    st.write("#### Symbolic Derivative:")
+    st.latex(sp.latex(sp.diff(expr, x)))
+    st.write("#### Indefinite Integral:")
+    st.latex(sp.latex(sp.integrate(expr, x)))
+    # 
 
 # 9) Log and Exponential
 elif choice.startswith("9)"):

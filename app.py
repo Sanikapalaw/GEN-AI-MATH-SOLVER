@@ -31,7 +31,7 @@ if choice.startswith("1)"):
     st.header("1) Basic Arithmetic Mathematical Model")
     a = st.number_input("First Number", value=10.0)
     b = st.number_input("Second Number", value=5.0)
-    st.write(f"Sum: {a + b} | Difference: {a - b} | Product: {a * b} | Division: {a / b if b != 0 else 'Error'}")
+    st.write(f"Sum: {a + b} | Difference: {a - b} | Product: {a * b}")
 
 # 2) Linear Algebra & Trig
 elif choice.startswith("2)"):
@@ -52,12 +52,8 @@ elif choice.startswith("3)"):
     data = np.fromstring(data_str, sep=',')
     if len(data) > 0:
         st.write(f"Mean: {np.mean(data)} | Std Dev: {np.std(data)}")
-    # 
 
-[Image of a normal distribution curve with mean and standard deviation]
-
-
-# 4) FFT
+# 4) Fast Fourier Transform
 elif choice.startswith("4)"):
     st.header("4) Fast Fourier Transform (FFT)")
     sig = np.fromstring(st.text_input("Signal Array", "1, 0, 1, 0"), sep=',')
@@ -65,11 +61,12 @@ elif choice.startswith("4)"):
         st.write("FFT Result:", fft.fft(sig))
     # 
 
-# 5) Laplace
+# 5) Laplace Transform
 elif choice.startswith("5)"):
     st.header("5) Laplace Transform")
     f_t = st.text_input("Function f(t)", "exp(-t)")
     expr = sp.sympify(f_t)
+    # Symbolic Laplace logic
     st.latex(rf"\mathcal{{L}}\{{{sp.latex(expr)}\}} = {sp.latex(sp.laplace_transform(expr, t, s)[0])}")
     # 
 
@@ -80,10 +77,10 @@ elif choice.startswith("6)"):
     if len(sig_dct) > 0:
         st.write("DCT Result:", fft.dct(sig_dct))
 
-# 7) Matrices, Vectors, Arrays
+# 7) Matrices, Vectors and Arrays
 elif choice.startswith("7)"):
     st.header("7) Matrices, Vectors and Arrays")
-    # Uses your matrix values from previous images
+    # Using your matrix values from Mumbai
     mat = np.array([[347, 769], [847, 567]]) 
     st.write("Matrix A:", mat)
     st.write(f"Determinant: {np.linalg.det(mat)}")

@@ -1,4 +1,5 @@
-streamlit
-numpy
-sympy
-scipy
+streamlit 
+numpy 
+scipy 
+sympy 
+google-generativeai

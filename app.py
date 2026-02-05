@@ -1,99 +1,105 @@
 import streamlit as st
 import numpy as np
+import scipy.fft as fft
+from scipy import integrate, stats, signal
 import sympy as sp
-from scipy import integrate, fft, stats
 import google.generativeai as genai
 
-# --- 1. SYSTEM CONFIGURATION ---
-# Use your Google AI Studio Key here
-genai.configure(api_key="YOUR_API_KEY")
+# --- 1. SETUP ---
+# Replace with your Gemini API Key
+genai.configure(api_key="YOUR_GEMINI_API_KEY")
 ai_model = genai.GenerativeModel('gemini-1.5-flash')
 
-st.set_page_config(page_title="GenAI Math System", layout="wide")
-st.title("🏛️ Advanced Mathematical & Physical System")
-st.markdown("Solving Hard Problems with AI Logic and Symbolic Calculus.")
+st.set_page_config(page_title="Universal Math AI", layout="wide")
+st.title("🧮 GenAI Mathematical & Physical System")
 
-# --- 2. SIDEBAR NAVIGATION ---
-st.sidebar.header("Mathematical Domains")
-app_mode = st.sidebar.selectbox("Choose a Module", [
-    "Physical Integration & Calculus",
-    "Linear Algebra (Matrices/Vectors)",
-    "Signal Processing (FFT/DCT/Laplace)",
-    "Statistics & Probability",
-    "GenAI Hard Problem Solver"
-])
+# --- 2. THE 9-DOMAIN NAVIGATOR ---
+menu = [
+    "1. Basic Arithmetic & Logs",
+    "2. Trig & Linear Algebra",
+    "3. Calculus & Stats",
+    "4. Signal Transforms (FFT/DCT/Laplace)",
+    "5. Matrix & Vector Lab"
+]
+choice = st.sidebar.selectbox("Select Mathematical Module", menu)
 
-# --- 3. MODULE: PHYSICAL INTEGRATION & CALCULUS ---
-if app_mode == "Physical Integration & Calculus":
-    st.header("📐 Physical System Solver: Calculus")
-    st.info("Example: Integration of sine square from 0 to 4")
-    
+# --- 3. MODULE LOGIC ---
+
+if "1." in choice:
+    st.header("Arithmetic, Logs & Exponentials")
+    num = st.number_input("Input Value", value=10.0)
     col1, col2 = st.columns(2)
     with col1:
-        func_str = st.text_input("Enter Function f(x)", "sin(x)**2")
-        lower_limit = st.number_input("Lower Limit (a)", value=0.0)
-        upper_limit = st.number_input("Upper Limit (b)", value=4.0)
+        st.write(f"Common Log ($\log_{{10}}$): {np.log10(num)}")
+        st.write(f"Natural Log ($\ln$): {np.log(num)}")
+    with col2:
+        st.write(f"Exponential ($e^x$): {np.exp(num)}")
+        st.write(f"Square Root: {np.sqrt(num)}")
+
+elif "2." in choice:
+    st.header("Trigonometry & Basic Algebra")
+    angle = st.number_input("Angle in Degrees", value=30.0)
+    rad = np.radians(angle)
+    st.write(f"$\sin({angle}^\circ) = {np.sin(rad)}$")
+    st.write(f"$\cos({angle}^\circ) = {np.cos(rad)}$")
     
-    # Symbolic Computation using SymPy
+
+[Image of unit circle with sine and cosine values]
+
+
+elif "3." in choice:
+    st.header("Calculus, Statistics & Probability")
     x = sp.Symbol('x')
-    try:
-        f_x = sp.sympify(func_str)
-        indefinite = sp.integrate(f_x, x)
-        definite = sp.integrate(f_x, (x, lower_limit, upper_limit))
+    expr_input = st.text_input("Enter Function (e.g., x**2 + sin(x))", "sin(x)**2")
+    
+    # Symbolic Calculus
+    expr = sp.sympify(expr_input)
+    st.latex(rf"f(x) = {sp.latex(expr)}")
+    st.write("Derivative:", sp.diff(expr, x))
+    
+    # Physical Question Integration (Example: Limit is 4)
+    upper = st.number_input("Integration Upper Limit", value=4.0)
+    res = sp.integrate(expr, (x, 0, upper))
+    st.success(f"Definite Integral (0 to {upper}): {res.evalf():.4f}")
+    
+
+[Image of definite integral area under a curve]
+
+
+elif "4." in choice:
+    st.header("Advanced Transforms (FFT, DCT, Laplace)")
+    sig_str = st.text_input("Enter Signal Data (commas)", "1, 2, 1, 0, 1, 2, 1")
+    sig = np.fromstring(sig_str, sep=',')
+    
+    tab1, tab2, tab3 = st.tabs(["FFT", "DCT", "Laplace"])
+    with tab1:
+        st.write("Fast Fourier Transform:", fft.fft(sig))
         
-        with col2:
-            st.write("### Symbolic Result")
-            st.latex(rf"\int_{{{lower_limit}}}^{{{upper_limit}}} {sp.latex(f_x)} \, dx")
-            st.success(f"Numerical Result: {float(definite.evalf()):.4f}")
-            
-        # AI Step-by-Step Logic
-        if st.button("Explain the Physical Steps"):
-            prompt = f"Explain the physical logic and step-by-step derivation for integrating {func_str} between {lower_limit} and {upper_limit}."
-            response = ai_model.generate_content(prompt)
-            st.markdown(response.text)
-            
-    except Exception as e:
-        st.error(f"Error in expression: {e}")
+    with tab2:
+        st.write("Discrete Cosine Transform:", fft.dct(sig))
+    with tab3:
+        # Laplace is symbolic
+        t, s = sp.symbols('t s')
+        f_t = sp.exp(-t) * sp.sin(t)
+        st.write("Example Laplace Transform of $e^{-t}\sin(t)$:")
+        st.latex(sp.latex(sp.laplace_transform(f_t, t, s)[0]))
 
-# --- 4. MODULE: SIGNAL PROCESSING ---
-elif app_mode == "Signal Processing (FFT/DCT/Laplace)":
-    st.header("📡 Signal Transforms")
-    signal_input = st.text_input("Enter Signal Array (comma separated)", "0, 1, 0, -1, 0, 1")
-    data = np.fromstring(signal_input, sep=',')
+elif "5." in choice:
+    st.header("Matrix, Vector & Array Operations")
+    st.write("Enter a 2x2 Matrix")
+    m = np.array([[st.number_input("A[0,0]", 1), st.number_input("A[0,1]", 0)],
+                  [st.number_input("A[1,0]", 0), st.number_input("A[1,1]", 1)]])
     
-    t1, t2 = st.tabs(["Fast Fourier (FFT)", "Discrete Cosine (DCT)"])
-    with t1:
-        st.write("Frequency Domain representation:")
-        st.write(fft.fft(data))
-    with t2:
-        st.write("Compressed Signal (DCT):")
-        st.write(fft.dct(data))
+    if st.button("Calculate Matrix Properties"):
+        st.write("Determinant:", np.linalg.det(m))
+        st.write("Eigenvalues:", np.linalg.eigvals(m))
+        
 
-# --- 5. MODULE: LINEAR ALGEBRA ---
-elif app_mode == "Linear Algebra (Matrices/Vectors)":
-    st.header("📋 Matrix System")
-    st.write("Define a 2x2 Matrix A")
-    a00 = st.number_input("A[0,0]", value=1)
-    a01 = st.number_input("A[0,1]", value=0)
-    a10 = st.number_input("A[1,0]", value=0)
-    a11 = st.number_input("A[1,1]", value=1)
-    
-    matrix = np.array([[a00, a01], [a10, a11]])
-    st.write("Matrix A:", matrix)
-    
-    if st.button("Analyze Matrix"):
-        det = np.linalg.det(matrix)
-        st.write(f"Determinant: {det}")
-        if det != 0:
-            st.write("Inverse:", np.linalg.inv(matrix))
-        else:
-            st.warning("Matrix is singular (no inverse).")
-
-# --- 6. MODULE: GENAI HARD PROBLEM SOLVER ---
-elif app_mode == "GenAI Hard Problem Solver":
-    st.header("🧠 Logic & Proof Solver")
-    user_query = st.text_area("Paste your hard problem, word problem, or proof here:")
-    if st.button("Solve with AI Logic"):
-        with st.spinner("AI is thinking..."):
-            res = ai_model.generate_content(user_query)
-            st.markdown(res.text)
+# --- 4. THE 'HARD PROBLEM' AI SOLVER ---
+st.divider()
+st.header("🤖 GenAI Hard Problem Solver")
+problem = st.text_area("Paste a complex physical or mathematical proof here:")
+if st.button("Solve with AI Logic"):
+    with st.spinner("Analyzing..."):
+        response = ai_model.generate_content(f"Solve this step-by-step with mathematical rigor: {problem}")
+        st.markdown(response.text)

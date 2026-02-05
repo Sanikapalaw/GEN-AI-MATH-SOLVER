@@ -3,9 +3,9 @@ import numpy as np
 import sympy as sp
 from scipy.fftpack import dct
 
-st.set_page_config(page_title="GenAI Math Solver", layout="wide")
+st.set_page_config("GenAI Math Solver", layout="wide")
 st.title("🧠 Gen-AI Mathematical Solver")
-st.caption("Solves EASY ➜ HARD Mathematical Problems with Step-by-Step Explanation")
+st.caption("Solves HARD mathematical problems with step-by-step explanations")
 
 x = sp.symbols('x')
 t, s = sp.symbols('t s')
@@ -14,15 +14,15 @@ t, s = sp.symbols('t s')
 option = st.sidebar.selectbox(
     "Select Mathematical Model",
     [
-        "1. Basic Arithmetic",
-        "2. Linear Algebra & Trigonometry",
-        "3. Calculus, Statistics & Probability",
-        "4. Fast Fourier Transform (FFT)",
-        "5. Laplace Transform",
-        "6. Discrete Cosine Transform (DCT)",
-        "7. Matrices, Vectors & Arrays",
-        "8. Derivatives & Integration",
-        "9. Logarithmic & Exponential",
+        "1) Basic Arithmetic",
+        "2) Linear Algebra & Trigonometry",
+        "3) Calculus, Statistics & Probability",
+        "4) FFT",
+        "5) Laplace Transform",
+        "6) DCT",
+        "7) Matrices, Vectors & Arrays",
+        "8) Derivative & Integration",
+        "9) Log & Exponential",
         "🔥 Hard AI Math Solver"
     ]
 )
@@ -30,227 +30,204 @@ option = st.sidebar.selectbox(
 # =====================================================
 # 1. BASIC ARITHMETIC
 # =====================================================
-if option == "1. Basic Arithmetic":
-    st.header("➕ Basic Arithmetic Mathematical Model")
+if option.startswith("1"):
+    st.header("➕ Basic Arithmetic")
 
-    a = st.number_input("Enter first number")
-    b = st.number_input("Enter second number")
+    a = st.number_input("Enter a")
+    b = st.number_input("Enter b")
 
-    operation = st.selectbox(
-        "Select Operation",
-        ["Addition", "Subtraction", "Multiplication", "Division", "Power"]
-    )
+    op = st.selectbox("Operation", ["+", "-", "×", "÷", "^"])
 
     if st.button("Solve"):
         st.subheader("Step-by-Step Solution")
-        if operation == "Addition":
-            st.write(f"Step 1: a + b")
-            st.write(f"Step 2: {a} + {b}")
-            st.success(a + b)
 
-        elif operation == "Subtraction":
-            st.write(f"Step 1: a − b")
-            st.write(f"Step 2: {a} − {b}")
-            st.success(a - b)
+        if op == "+":
+            st.latex(f"{a} + {b} = {a+b}")
 
-        elif operation == "Multiplication":
-            st.write(f"Step 1: a × b")
-            st.write(f"Step 2: {a} × {b}")
-            st.success(a * b)
+        elif op == "-":
+            st.latex(f"{a} - {b} = {a-b}")
 
-        elif operation == "Division":
+        elif op == "×":
+            st.latex(f"{a} \\times {b} = {a*b}")
+
+        elif op == "÷":
             if b == 0:
                 st.error("Division by zero not allowed")
             else:
-                st.write(f"Step 1: a ÷ b")
-                st.write(f"Step 2: {a} ÷ {b}")
-                st.success(a / b)
+                st.latex(f"\\frac{{{a}}}{{{b}}} = {a/b}")
 
-        elif operation == "Power":
-            st.write(f"Step 1: a^b")
-            st.write(f"Step 2: {a}^{b}")
+        elif op == "^":
             if abs(b) > 100:
-                st.warning("Exponent too large → AI approximation used")
-                st.write("log(result) =", b * np.log(abs(a)))
+                st.warning("Large exponent → approximation")
+                st.latex(f"\\log({a}^{{{b}}}) = {b*np.log(abs(a))}")
             else:
-                st.success(a ** b)
+                st.latex(f"{a}^{{{b}}} = {a**b}")
 
 # =====================================================
 # 2. LINEAR ALGEBRA & TRIGONOMETRY
 # =====================================================
-elif option == "2. Linear Algebra & Trigonometry":
+elif option.startswith("2"):
     st.header("📐 Linear Algebra & Trigonometry")
 
-    A = np.array([
-        [st.number_input("A[0][0]"), st.number_input("A[0][1]")],
-        [st.number_input("A[1][0]"), st.number_input("A[1][1]")]
+    A = sp.Matrix([
+        [st.number_input("A11"), st.number_input("A12")],
+        [st.number_input("A21"), st.number_input("A22")]
     ])
 
-    task = st.selectbox("Select Task", ["Determinant", "Inverse", "Transpose", "Trigonometry"])
+    task = st.selectbox("Task", ["Determinant", "Inverse", "Transpose", "Trigonometry"])
 
-    if task != "Trigonometry":
-        st.write("Matrix A")
-        st.dataframe(A)
+    if task != "Trigonometry" and st.button("Solve"):
+        st.subheader("Matrix A")
+        st.latex(sp.latex(A))
 
-        if st.button("Solve"):
-            det = np.linalg.det(A)
+        if task == "Determinant":
+            st.markdown("**Step:** |A| = ad − bc")
+            st.latex(sp.latex(A.det()))
 
-            if task == "Determinant":
-                st.write("Step 1: |A| = ad − bc")
-                st.success(det)
+        elif task == "Inverse":
+            if A.det() == 0:
+                st.error("Inverse does not exist")
+            else:
+                st.markdown("**Step:** A⁻¹ = 1/|A| × adj(A)")
+                st.latex(sp.latex(A.inv()))
 
-            elif task == "Inverse":
-                if abs(det) < 1e-6:
-                    st.error("Inverse does not exist")
-                else:
-                    st.write("Step 1: A⁻¹ = (1/|A|) × adj(A)")
-                    st.dataframe(np.linalg.inv(A))
+        elif task == "Transpose":
+            st.markdown("**Step:** Swap rows and columns")
+            st.latex(sp.latex(A.T))
 
-            elif task == "Transpose":
-                st.write("Step 1: Swap rows and columns")
-                st.dataframe(A.T)
-
-    else:
-        angle = st.number_input("Enter angle (degrees)")
+    if task == "Trigonometry":
+        angle = st.number_input("Angle (degrees)")
         rad = np.deg2rad(angle)
-        st.write("sin =", np.sin(rad))
-        st.write("cos =", np.cos(rad))
-        st.write("tan =", np.tan(rad))
+        st.latex(r"\sin = " + sp.latex(np.sin(rad)))
+        st.latex(r"\cos = " + sp.latex(np.cos(rad)))
+        st.latex(r"\tan = " + sp.latex(np.tan(rad)))
 
 # =====================================================
 # 3. CALCULUS, STATISTICS & PROBABILITY
 # =====================================================
-elif option == "3. Calculus, Statistics & Probability":
+elif option.startswith("3"):
     st.header("📘 Calculus, Statistics & Probability")
 
-    task = st.selectbox("Select Task", ["Derivative", "Integral", "Limit", "Statistics", "Probability"])
+    task = st.selectbox("Task", ["Derivative", "Integral", "Limit", "Statistics", "Probability"])
 
     if task in ["Derivative", "Integral", "Limit"]:
-        expr_input = st.text_input("Enter Function (example: x**3 + sin(x) + log(x))")
+        expr_input = st.text_input("Enter function in x")
 
-        if expr_input:
-            expr = sp.sympify(expr_input)
+        if expr_input and st.button("Solve"):
+            f = sp.sympify(expr_input)
 
-            if task == "Derivative" and st.button("Solve"):
-                st.write("Step 1: Identify function")
-                st.write("Step 2: Apply differentiation rules")
-                st.success(sp.diff(expr, x))
+            st.markdown("**Given function:**")
+            st.latex(sp.latex(f))
 
-            elif task == "Integral" and st.button("Solve"):
-                st.write("Step 1: Identify integrand")
-                st.write("Step 2: Apply integration rules")
-                st.success(sp.integrate(expr, x))
+            if task == "Derivative":
+                st.markdown("**Applying differentiation rules**")
+                st.latex(sp.latex(sp.diff(f, x)))
+
+            elif task == "Integral":
+                st.markdown("**Applying integration rules**")
+                st.latex(r"\int " + sp.latex(f) + r"\,dx = " + sp.latex(sp.integrate(f, x)))
 
             elif task == "Limit":
-                point = st.number_input("Limit at x →")
-                if st.button("Solve"):
-                    st.write("Step 1: Substitute limit value")
-                    st.success(sp.limit(expr, x, point))
+                point = st.number_input("Limit point")
+                st.latex(sp.latex(sp.limit(f, x, point)))
 
     elif task == "Statistics":
-        data = st.text_input("Enter data (space separated)")
+        data = st.text_input("Enter data")
         if st.button("Analyze"):
             nums = np.array(list(map(float, data.split())))
-            st.write("Mean =", np.mean(nums))
-            st.write("Variance =", np.var(nums))
-            st.write("Standard Deviation =", np.std(nums))
+            st.latex(r"\text{Mean} = " + sp.latex(np.mean(nums)))
+            st.latex(r"\text{Variance} = " + sp.latex(np.var(nums)))
+            st.latex(r"\text{Std Dev} = " + sp.latex(np.std(nums)))
 
     elif task == "Probability":
-        fav = st.number_input("Favorable outcomes", min_value=0)
-        total = st.number_input("Total outcomes", min_value=1)
+        fav = st.number_input("Favorable")
+        total = st.number_input("Total", min_value=1)
         if st.button("Solve"):
-            st.write("Probability = favorable / total")
-            st.success(fav / total)
+            st.latex(r"P = \frac{" + str(fav) + "}{" + str(total) + "} = " + str(fav/total))
 
 # =====================================================
 # 4. FFT
 # =====================================================
-elif option == "4. Fast Fourier Transform (FFT)":
+elif option.startswith("4"):
     st.header("🌊 Fast Fourier Transform")
 
-    signal = st.text_input("Enter signal values")
+    values = st.text_input("Enter signal")
     if st.button("Apply FFT"):
-        arr = np.array(list(map(float, signal.split())))
-        st.write("Step 1: Convert time domain to frequency domain")
-        st.success(np.fft.fft(arr))
+        arr = np.array(list(map(float, values.split())))
+        st.markdown("**Time → Frequency domain**")
+        st.latex(sp.latex(np.fft.fft(arr)))
 
 # =====================================================
 # 5. LAPLACE TRANSFORM
 # =====================================================
-elif option == "5. Laplace Transform":
+elif option.startswith("5"):
     st.header("🔄 Laplace Transform")
 
-    func = st.text_input("Enter function of t (example: exp(-2*t))")
+    func = st.text_input("Enter function in t")
     if st.button("Solve"):
         f = sp.sympify(func)
-        st.write("Step 1: Apply Laplace definition")
-        st.success(sp.laplace_transform(f, t, s))
+        st.markdown("**Applying Laplace definition**")
+        st.latex(sp.latex(sp.laplace_transform(f, t, s)))
 
 # =====================================================
 # 6. DCT
 # =====================================================
-elif option == "6. Discrete Cosine Transform (DCT)":
+elif option.startswith("6"):
     st.header("📉 Discrete Cosine Transform")
 
     values = st.text_input("Enter values")
     if st.button("Apply DCT"):
         arr = np.array(list(map(float, values.split())))
-        st.write("Step 1: Convert signal to cosine frequency domain")
-        st.success(dct(arr, norm="ortho"))
+        st.latex(sp.latex(dct(arr, norm="ortho")))
 
 # =====================================================
 # 7. MATRICES, VECTORS & ARRAYS
 # =====================================================
-elif option == "7. Matrices, Vectors & Arrays":
+elif option.startswith("7"):
     st.header("🧩 Matrices, Vectors & Arrays")
 
     vec = st.text_input("Enter vector")
     if st.button("Create"):
-        st.write("Vector =", np.array(list(map(float, vec.split()))))
+        v = sp.Matrix(list(map(float, vec.split())))
+        st.latex(sp.latex(v))
 
 # =====================================================
-# 8. DERIVATIVES & INTEGRATION (NUMERICAL)
+# 8. DERIVATIVE & INTEGRATION (MAIN)
 # =====================================================
-elif option == "8. Derivatives & Integration":
-    st.header("📐 Numerical Derivatives & Integration")
+elif option.startswith("8"):
+    st.header("📐 Derivative & Integration")
 
-    start = st.number_input("Start")
-    end = st.number_input("End")
-    points = st.number_input("Points", min_value=10)
+    func = st.text_input("Enter function in x")
+    if func and st.button("Solve Calculus"):
+        f = sp.sympify(func)
 
-    if st.button("Solve"):
-        x_vals = np.linspace(start, end, int(points))
-        y_vals = x_vals**2
-        st.write("Numerical Derivative =", np.gradient(y_vals, x_vals))
-        st.write("Numerical Integration =", np.trapz(y_vals, x_vals))
+        st.subheader("Derivative")
+        st.latex(sp.latex(sp.diff(f, x)))
+
+        st.subheader("Integral")
+        st.latex(r"\int " + sp.latex(f) + r"\,dx = " + sp.latex(sp.integrate(f, x)))
 
 # =====================================================
 # 9. LOG & EXPONENTIAL
 # =====================================================
-elif option == "9. Logarithmic & Exponential":
+elif option.startswith("9"):
     st.header("📈 Logarithmic & Exponential")
 
-    vals = st.text_input("Enter values")
-    if st.button("Solve"):
-        arr = np.array(list(map(float, vals.split())))
-        st.write("log =", np.log(arr))
-        st.write("exp =", np.exp(arr))
+    func = st.text_input("Enter expression")
+    if func and st.button("Solve"):
+        f = sp.sympify(func)
+        st.latex(sp.latex(f))
+        st.latex(r"\log = " + sp.latex(sp.log(f)))
+        st.latex(r"e^x = " + sp.latex(sp.exp(f)))
 
 # =====================================================
 # HARD AI SOLVER
 # =====================================================
-elif option == "🔥 Hard AI Math Solver":
-    st.header("🔥 HARD Mathematical Question Solver")
+elif "Hard" in option:
+    st.header("🔥 Hard AI Mathematical Solver")
 
-    problem = st.text_area(
-        "Enter HARD mathematical problem",
-        placeholder="Example: integrate(x*sin(x), x)"
-    )
-
+    problem = st.text_area("Enter HARD mathematical expression")
     if st.button("Solve using AI"):
-        try:
-            st.write("Step-by-Step AI Reasoning:")
-            result = sp.sympify(problem)
-            st.success(result)
-        except:
-            st.error("Invalid or unsupported expression")
+        expr = sp.sympify(problem)
+        st.markdown("**AI reasoning applied symbolically**")
+        st.latex(sp.latex(expr))

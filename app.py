@@ -1,178 +1,94 @@
 import streamlit as st
 import numpy as np
+import scipy.fftpack as fft
+import scipy.fft as dct
+from scipy import integrate, stats
 import sympy as sp
-from scipy.fftpack import dct
+import google.generativeai as genai
 
-st.set_page_config(page_title="GenAI Math Solver", layout="wide")
+# --- CONFIGURATION ---
+# Replace with your actual API key
+genai.configure(api_key="YOUR_GEMINI_API_KEY")
+model = genai.GenerativeModel('gemini-1.5-flash')
 
-st.title("🧠 GenAI Mathematical Solver")
-st.subheader("Solve Easy ➜ HARD Mathematical Problems using AI Logic")
+st.set_page_config(page_title="Advanced AI Math Suite", layout="wide")
+st.title("📐 Advanced Mathematical AI Solver")
+st.markdown("Solving everything from basic arithmetic to Laplace & Fourier Transforms.")
 
-# Sidebar Menu
-option = st.sidebar.selectbox(
-    "Choose Mathematical Module",
-    [
-        "Arithmetic",
-        "Linear Algebra",
-        "Calculus",
-        "Statistics & Probability",
-        "FFT",
-        "Laplace Transform",
-        "DCT",
-        "Derivatives & Integration",
-        "Log & Exponential",
-        "Hard AI Math Solver"
-    ]
-)
+# --- SIDEBAR: NAVIGATION ---
+menu = [
+    "Arithmetic & Logs", 
+    "Linear Algebra & Matrices", 
+    "Calculus & Derivatives", 
+    "Statistics & Probability", 
+    "Signal Transforms (FFT/DCT/Laplace)",
+    "AI Hard Problem Solver"
+]
+choice = st.sidebar.selectbox("Select Mathematical Domain", menu)
 
-# ----------------------------------------
-# Arithmetic
-# ----------------------------------------
-if option == "Arithmetic":
-    st.header("➕ Arithmetic Operations")
+# --- HELPER: AI LOGIC ---
+def get_ai_explanation(problem):
+    prompt = f"Explain the step-by-step logic to solve this mathematical problem: {problem}"
+    response = model.generate_content(prompt)
+    return response.text
 
-    a = st.number_input("Enter first number")
-    b = st.number_input("Enter second number")
+# --- 1. ARITHMETIC & LOGS ---
+if choice == "Arithmetic & Logs":
+    st.header("Basic Arithmetic & Exponential Functions")
+    val = st.number_input("Enter a value", value=1.0)
+    col1, col2 = st.columns(2)
+    with col1:
+        st.write(f"Natural Log (ln): {np.log(val)}")
+        st.write(f"Common Log (log10): {np.log10(val)}")
+    with col2:
+        st.write(f"Exponential (e^x): {np.exp(val)}")
+        st.write(f"Square Root: {np.sqrt(val)}")
 
-    if st.button("Calculate"):
-        st.write("Addition:", a + b)
-        st.write("Subtraction:", a - b)
-        st.write("Multiplication:", a * b)
-        if b != 0:
-            st.write("Division:", a / b)
-        st.write("Power:", a ** b)
+# --- 2. LINEAR ALGEBRA & MATRICES ---
+elif choice == "Linear Algebra & Matrices":
+    st.header("Matrix Operations & Linear Algebra")
+    st.write("Enter values for a 2x2 Matrix:")
+    r1c1 = st.number_input("A[0,0]", value=1)
+    r1c2 = st.number_input("A[0,1]", value=2)
+    r2c1 = st.number_input("A[1,0]", value=3)
+    r2c2 = st.number_input("A[1,1]", value=4)
+    
+    A = np.array([[r1c1, r1c2], [r2c1, r2c2]])
+    st.write("Current Matrix:", A)
+    
+    if st.button("Calculate Properties"):
+        st.write(f"Determinant: {np.linalg.det(A)}")
+        st.write(f"Trace: {np.trace(A)}")
+        st.write("Eigenvalues:", np.linalg.eigvals(A))
 
-# ----------------------------------------
-# Linear Algebra
-# ----------------------------------------
-elif option == "Linear Algebra":
-    st.header("📐 Linear Algebra")
+# --- 3. CALCULUS & DERIVATIVES ---
+elif choice == "Calculus & Derivatives":
+    st.header("Calculus: Derivatives & Integration")
+    expr_input = st.text_input("Enter a function of x (e.g., x**2 + sin(x))", "x**2")
+    x = sp.Symbol('x')
+    expr = sp.sympify(expr_input)
+    
+    st.latex(f"f(x) = {sp.latex(expr)}")
+    st.write("Derivative:", sp.diff(expr, x))
+    st.write("Indefinite Integral:", sp.integrate(expr, x))
 
-    A = np.array([
-        [st.number_input("A[0][0]"), st.number_input("A[0][1]")],
-        [st.number_input("A[1][0]"), st.number_input("A[1][1]")]
-    ])
+# --- 4. SIGNAL TRANSFORMS ---
+elif choice == "Signal Transforms (FFT/DCT/Laplace)":
+    st.header("FFT, DCT, and Laplace Transforms")
+    data_input = st.text_input("Enter signal values separated by commas", "1, 2, 3, 4, 3, 2, 1")
+    data = np.fromstring(data_input, sep=',')
+    
+    tab1, tab2 = st.tabs(["FFT", "DCT"])
+    with tab1:
+        st.write("Fast Fourier Transform (FFT):", fft.fft(data))
+    with tab2:
+        st.write("Discrete Cosine Transform (DCT):", dct.dct(data))
 
-    if st.button("Solve Matrix"):
-        st.write("Matrix A:", A)
-        st.write("Determinant:", np.linalg.det(A))
-        if np.linalg.det(A) != 0:
-            st.write("Inverse:", np.linalg.inv(A))
-
-# ----------------------------------------
-# Calculus
-# ----------------------------------------
-elif option == "Calculus":
-    st.header("📘 Calculus")
-
-    x = sp.symbols('x')
-    expr = st.text_input("Enter function (example: x**3 + sin(x))")
-
-    if st.button("Solve Calculus"):
-        f = sp.sympify(expr)
-        st.write("Derivative:", sp.diff(f, x))
-        st.write("Integral:", sp.integrate(f, x))
-
-# ----------------------------------------
-# Statistics & Probability
-# ----------------------------------------
-elif option == "Statistics & Probability":
-    st.header("📊 Statistics & Probability")
-
-    data = st.text_input("Enter data (space separated):")
-
-    if st.button("Analyze"):
-        nums = np.array(list(map(float, data.split())))
-        st.write("Mean:", np.mean(nums))
-        st.write("Variance:", np.var(nums))
-        st.write("Standard Deviation:", np.std(nums))
-
-# ----------------------------------------
-# FFT
-# ----------------------------------------
-elif option == "FFT":
-    st.header("🌊 Fast Fourier Transform")
-
-    signal = st.text_input("Enter signal values:")
-
-    if st.button("Apply FFT"):
-        sig = np.array(list(map(float, signal.split())))
-        st.write("FFT Output:", np.fft.fft(sig))
-
-# ----------------------------------------
-# Laplace Transform
-# ----------------------------------------
-elif option == "Laplace Transform":
-    st.header("🔄 Laplace Transform")
-
-    t, s = sp.symbols('t s')
-    func = st.text_input("Enter function of t (example: exp(-2*t))")
-
-    if st.button("Find Laplace"):
-        f = sp.sympify(func)
-        st.write("Laplace Transform:", sp.laplace_transform(f, t, s))
-
-# ----------------------------------------
-# DCT
-# ----------------------------------------
-elif option == "DCT":
-    st.header("📉 Discrete Cosine Transform")
-
-    values = st.text_input("Enter values:")
-
-    if st.button("Apply DCT"):
-        arr = np.array(list(map(float, values.split())))
-        st.write("DCT Output:", dct(arr, norm="ortho"))
-
-# ----------------------------------------
-# Derivatives & Integration (Numerical)
-# ----------------------------------------
-elif option == "Derivatives & Integration":
-    st.header("📐 Numerical Methods")
-
-    start = st.number_input("Start Value")
-    end = st.number_input("End Value")
-    points = st.number_input("Number of points", min_value=10, step=10)
-
-    if st.button("Compute"):
-        x_vals = np.linspace(start, end, int(points))
-        y_vals = x_vals**2
-        st.write("Derivative:", np.gradient(y_vals, x_vals))
-        st.write("Integration:", np.trapz(y_vals, x_vals))
-
-# ----------------------------------------
-# Log & Exponential
-# ----------------------------------------
-elif option == "Log & Exponential":
-    st.header("📈 Logarithmic & Exponential")
-
-    values = st.text_input("Enter values:")
-
-    if st.button("Solve"):
-        v = np.array(list(map(float, values.split())))
-        st.write("Log:", np.log(v))
-        st.write("Exponential:", np.exp(v))
-
-# ----------------------------------------
-# HARD AI MATH SOLVER
-# ----------------------------------------
-elif option == "Hard AI Math Solver":
-    st.header("🔥 HARD Mathematical Question Solver (GenAI Style)")
-
-    st.write("Supports:")
-    st.write("- Differential equations")
-    st.write("- Integrals & limits")
-    st.write("- Matrix equations")
-    st.write("- Symbolic simplification")
-
-    problem = st.text_area(
-        "Enter HARD math problem (example: integrate(x*sin(x), x) or dsolve(y''+y=0))"
-    )
-
-    if st.button("Solve using AI"):
-        try:
-            result = sp.sympify(problem)
-            st.success("Solution:")
-            st.write(result)
-        except:
-            st.error("Unable to solve. Please check syntax.")
+# --- 5. AI HARD PROBLEM SOLVER ---
+elif choice == "AI Hard Problem Solver":
+    st.header("🤖 AI Expert: Step-by-Step Logic")
+    problem = st.text_area("Paste your 'Hard Problem' here (e.g., complex word problems, proofs, or Laplace derivations)")
+    if st.button("Solve with Gen AI"):
+        with st.spinner("Analyzing problem logic..."):
+            explanation = get_ai_explanation(problem)
+            st.markdown(explanation)
